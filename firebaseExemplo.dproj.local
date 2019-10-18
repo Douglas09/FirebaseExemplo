@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2019/07/10 11:32:00.000.282,=C:\Users\Doda_Colombo\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2019/10/17 19:28:18.000.044,=C:\Users\Doda_Colombo\Documents\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>2019/10/17 20:13:38.000.696,=C:\Users\Doda_Colombo\Documents\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>2019/10/17 20:14:03.000.378,C:\Users\Doda_Colombo\Documents\Embarcadero\Studio\Projects\Unit2.fmx=C:\Users\Doda_Colombo\Desktop\FirebaseExemplo\uPrincipal.fmx</Transaction>
+    <Transaction>2019/10/17 20:14:03.000.378,C:\Users\Doda_Colombo\Documents\Embarcadero\Studio\Projects\Unit2.pas=C:\Users\Doda_Colombo\Desktop\FirebaseExemplo\uPrincipal.pas</Transaction>
+    <Transaction>2019/10/17 20:14:12.000.336,C:\Users\Doda_Colombo\Documents\Embarcadero\Studio\Projects\Project1.dproj=C:\Users\Doda_Colombo\Desktop\FirebaseExemplo\firebaseExemplo.dproj</Transaction>
+    <Transaction>2019/10/17 20:15:18.000.543,=C:\Users\Doda_Colombo\Desktop\FirebaseExemplo\FireBase\Firebase.Interfaces.pas</Transaction>
+    <Transaction>2019/10/17 20:15:18.000.543,=C:\Users\Doda_Colombo\Desktop\FirebaseExemplo\FireBase\Firebase.Request.pas</Transaction>
+    <Transaction>2019/10/17 20:15:18.000.558,=C:\Users\Doda_Colombo\Desktop\FirebaseExemplo\FireBase\Firebase.Response.pas</Transaction>
+    <Transaction>2019/10/17 20:15:18.000.527,=C:\Users\Doda_Colombo\Desktop\FirebaseExemplo\FireBase\Firebase.Auth.pas</Transaction>
+    <Transaction>2019/10/17 20:15:18.000.543,=C:\Users\Doda_Colombo\Desktop\FirebaseExemplo\FireBase\Firebase.Database.pas</Transaction>
+  </Transactions>
+	<ActiveMobileDevice>
+		<NoProfile iOSSimulator="iPhone5" Android="ce0616061aa8e33d04"/>
+	</ActiveMobileDevice>
+</BorlandProject>

@@ -1,0 +1,597 @@
+unit UFirebase_ViaturaTempoReal;
+
+interface
+
+uses
+  Firebase.Interfaces,
+  Firebase.Database,
+  System.SysUtils,
+  System.Classes,
+  System.Generics.Collections,
+  System.Threading,
+  System.JSON;
+
+type
+  TJSonOptions = set of (joCompleto, joIncremental);
+
+  TSendType = set of (stPost, stPut, stPatch);
+
+  TFirebase_Ocorrencias = class
+  private
+    FQtde_Envolvidos: String;
+    FArma_Branca: String;
+    FArma_Fogo: String;
+    FEmail: String;
+    FAlerta_Outro: String;
+    FCodigo: String;
+    FAlerta: String;
+    procedure SetAlerta(const Value: String);
+    procedure SetAlerta_Outro(const Value: String);
+    procedure SetArma_Branca(const Value: String);
+    procedure SetArma_Fogo(const Value: String);
+    procedure SetCodigo(const Value: String);
+    procedure SetEmail(const Value: String);
+    procedure SetQtde_Envolvidos(const Value: String);
+
+    public
+      property Email : String read FEmail write SetEmail;
+      property Codigo : String read FCodigo write SetCodigo;
+      property Alerta : String read FAlerta write SetAlerta;
+      property Alerta_Outro : String read FAlerta_Outro write SetAlerta_Outro;
+      property Arma_Branca : String read FArma_Branca write SetArma_Branca;
+      property Arma_Fogo : String read FArma_Fogo write SetArma_Fogo;
+      property Qtde_Envolvidos : String read FQtde_Envolvidos write SetQtde_Envolvidos;
+      function ToJSonObject : TJSONObject;
+  end;
+
+  TFirebase_Patrulheiros = class {CLASSE FILHA DE "TFirebase_ViaturaTempoReal"}
+  private
+    FCodigo: String;
+    FNome: String;
+    procedure SetCodigo(const Value: String);
+    procedure SetNome(const Value: String);
+    public
+      property Codigo : String read FCodigo write SetCodigo;
+      property Nome : String read FNome write SetNome;
+      function ToJSonObject : TJSONObject;
+  end;
+
+  TFirebase_ViaturaTempoReal = class {CLASSE PAI, PRINCIPAL}
+  private
+    FServico_Numero2: String;
+    FPolicial_Status: String;
+    FServico_Numero1: String;
+    FServico_Codigo: String;
+    FServico_Status: String;
+    FViatura_Placa: String;
+    FBaseURL: String;
+    FCorporacao_Codigo: String;
+    FViatura_Prefixo: String;
+    FPolicial_Codigo: String;
+    FLatitude: String;
+    FDataHora: TDateTime;
+    FLongitude: String;
+    procedure SetBaseURL(const Value: String);
+    procedure SetCorporacao_Codigo(const Value: String);
+    procedure SetPolicial_Codigo(const Value: String);
+    procedure SetPolicial_Status(const Value: String);
+    procedure SetServico_Codigo(const Value: String);
+    procedure SetServico_Numero1(const Value: String);
+    procedure SetServico_Numero2(const Value: String);
+    procedure SetServico_Status(const Value: String);
+    procedure SetViatura_Placa(const Value: String);
+    procedure SetViatura_Prefixo(const Value: String);
+    procedure SetDataHora(const Value: TDateTime);
+    procedure SetLatitude(const Value: String);
+    procedure SetLongitude(const Value: String);
+  protected
+    //CAMPOS PARA MATAR MEMÓRIA
+    { - } objViatura, objCorporacao, objPolicial, objServico,
+    { - } objApoio, objPatrulheirosJson, objJsonApp : TJSONObject;
+    { - } arrOcorrencias : TJSONArray;
+  public
+    FListPatrulheiros : TList;
+    FListOcorrencias : TList;
+    property BaseURL : String read FBaseURL;
+    property Viatura_Placa : String read FViatura_Placa write SetViatura_Placa;
+    property Viatura_Prefixo : String read FViatura_Prefixo write SetViatura_Prefixo;
+    property Servico_Codigo : String read FServico_Codigo write SetServico_Codigo;
+    property Servico_Numero1 : String read FServico_Numero1 write SetServico_Numero1;
+    property Servico_Numero2 : String read FServico_Numero2 write SetServico_Numero2;
+    property Servico_Status : String read FServico_Status write SetServico_Status;
+    property Corporacao_Codigo : String read FCorporacao_Codigo write SetCorporacao_Codigo;
+    property Policial_Codigo : String read FPolicial_Codigo write SetPolicial_Codigo;
+    property Policial_Status : String read FPolicial_Status write SetPolicial_Status;
+    property DataHora : TDateTime read FDataHora write SetDataHora;
+    property Latitude : String read FLatitude write SetLatitude;
+    property Longitude : String read FLongitude write SetLongitude;
+
+    constructor Create(BaseURL : String);
+    function CreatePatrulheiro : TFirebase_Patrulheiros;
+    function CreateOcorrencia : TFirebase_Ocorrencias;
+    procedure AddPatrulheiro(classe : TFirebase_Patrulheiros);
+    procedure AddOcorrencia(classe : TFirebase_Ocorrencias);
+
+    procedure resetarDados;
+    function sendData(tipo : TSendType; resource : String; viaThread : Boolean = false) : TJSONObject;
+    function sendOffData(resource, json : String; viaThread : Boolean = false) : TJSONObject;
+
+
+    function gerarOcorrencias_Json : TJSONArray;
+    function gerarServicos_Json : TJSONArray;
+
+    function gerarJSON(tipo : TJSonOptions = [joCompleto]) : TJSONObject;
+    function gerarJSON_APP(tipo : TJSonOptions = [joCompleto]) : TJSONObject;
+
+
+    destructor Destroy; override;
+  end;
+
+implementation
+
+procedure validarCampo(tipo : TJSonOptions; obj : TJSonObject; field, value : String);
+begin
+   Try
+       if (tipo <> [joCompleto]) and (Trim(value) = '') then
+          exit
+       else
+          obj.AddPair(field, value);
+   Except end;
+end;
+
+procedure gerarArquivoTXT(arquivo, valor : String);
+Var arq : TStringList;
+begin
+  Try
+     arq := TStringList.Create;
+     arq.Add(valor);
+     arq.SaveToFile(arquivo);
+  Except End;
+  arq.DisposeOf;
+end;
+
+function ajustarDataHora(now : TDateTime) : String;
+begin
+  result := DateTimeToStr(now);
+  result := StringReplace(result, ' ', '', [rfReplaceAll]);
+  result := StringReplace(result, '/', '', [rfReplaceAll]);
+  result := StringReplace(result, '-', '', [rfReplaceAll]);
+  result := StringReplace(result, ':', '', [rfReplaceAll]);
+  result := trim(StringReplace(result, '.', '', [rfReplaceAll]));
+end;
+
+function ajustarEmail(email : String) : String;
+begin
+  result := Trim(email);
+
+  Try
+     result := StringReplace(result, '@', 'ARROBA', [rfReplaceAll]);
+     result := StringReplace(result, '.', 'PONTO', [rfReplaceAll]);
+     result := Trim(StringReplace(result, '-', 'TRACO', [rfReplaceAll]));
+  Except End;
+end;
+
+
+{ TFirebase_ViaturaTempoReal }
+
+procedure TFirebase_ViaturaTempoReal.AddOcorrencia(classe: TFirebase_Ocorrencias);
+begin
+  FListOcorrencias.Add( classe );
+end;
+
+procedure TFirebase_ViaturaTempoReal.AddPatrulheiro(classe: TFirebase_Patrulheiros);
+begin
+  FListPatrulheiros.Add( classe );
+end;
+
+constructor TFirebase_ViaturaTempoReal.Create(BaseURL : String);
+begin
+  inherited Create;
+  Try
+     self.SetBaseURL(BaseURL);
+     self.DataHora     := 0;
+  Except end;
+  Try FListPatrulheiros := TList.Create; Except end;
+  Try FListOcorrencias  := TList.Create; Except end;
+end;
+
+function TFirebase_ViaturaTempoReal.CreateOcorrencia: TFirebase_Ocorrencias;
+begin
+  result := TFirebase_Ocorrencias.Create;
+end;
+
+function TFirebase_ViaturaTempoReal.CreatePatrulheiro: TFirebase_Patrulheiros;
+begin
+  result := TFirebase_Patrulheiros.Create;
+end;
+
+destructor TFirebase_ViaturaTempoReal.Destroy;
+Var pr : TFirebase_Patrulheiros;
+    itemOcorrencia : TFirebase_Ocorrencias;
+begin
+  Try
+     while (FListPatrulheiros.Count > 0) do
+     begin
+       Try
+         pr := FListPatrulheiros.Items[0];
+         pr.DisposeOf;
+       Except end;
+       FListPatrulheiros.Delete(0);
+     end;
+
+     while (FListOcorrencias.Count > 0) do
+     begin
+        Try
+           itemOcorrencia := FListOcorrencias.Items[0];
+           itemOcorrencia.DisposeOf;
+        Except end;
+        FListOcorrencias.Delete(0);
+     end;
+  Except End;
+
+  FListPatrulheiros.DisposeOf;
+  FListOcorrencias.DisposeOf;
+  Try
+//     objViatura.DisposeOf;
+//     objCorporacao.DisposeOf;
+//     objPolicial.DisposeOf;
+//     arrOcorrencias.DisposeOf;
+//     objJsonApp.DisposeOf;
+//     objServico.DisposeOf;
+  Except end;
+  inherited;
+end;
+
+function TFirebase_ViaturaTempoReal.gerarJSON(tipo : TJSonOptions = [joCompleto]) : TJSONObject;
+Var iPatrulheiro : TFirebase_Patrulheiros;
+begin
+  Try
+    result                    := TJSONObject.Create;
+    objViatura                := TJSONObject.Create;
+    objCorporacao             := TJSONObject.Create;
+    objPolicial               := TJSONObject.Create;
+    objServico                := TJSONObject.Create;
+    arrOcorrencias            := TJSONArray.Create;
+
+    if (self.DataHora <> 0) then
+       objServico.AddPair('DATAHORA', DateTimeToStr(self.DataHora))
+    else
+       objServico.AddPair('DATAHORA', '');
+    objServico.AddPair('LATITUDE', self.Latitude);
+    objServico.AddPair('LONGITUDE', self.Longitude);
+    objServico.AddPair('OCORRENCIA_EM_ATENDIMENTO', gerarOcorrencias_Json);
+    objServico.AddPair('PATRULHEIROS', gerarServicos_Json);
+
+    validarCampo(tipo, objServico, 'STATUS', self.Servico_Status);
+    validarCampo(tipo, objServico, 'NUMERO1', self.Servico_Numero1);
+    validarCampo(tipo, objServico, 'NUMERO2', self.Servico_Numero2);
+    validarCampo(tipo, objServico, 'POLICIAL_STATUS', self.Policial_Status);
+    validarCampo(tipo, objServico, 'VIATURA_PREFIXO', self.Viatura_Prefixo);
+    result := objServico;
+  Except on E : Exception do
+     begin
+        result := TJSONObject.Create;
+        result.AddPair('STATUS', 'Erro, motivo - '+ E.Message);
+     End;
+  End;
+end;
+
+function TFirebase_ViaturaTempoReal.gerarJSON_APP(tipo: TJSonOptions): TJSONObject;
+Var itPatrulheiro : TFirebase_Patrulheiros;
+begin
+  Try
+    result                    := TJSONObject.Create;
+    objViatura                := TJSONObject.Create;
+    objCorporacao             := TJSONObject.Create;
+    objPolicial               := TJSONObject.Create;
+    arrOcorrencias            := TJSONArray.Create;
+
+    objJsonApp := TJSONObject.Create;
+    if (self.DataHora <> 0) then
+       objJsonApp.AddPair('DATAHORA', DateTimeToStr(self.DataHora))
+    else
+       objJsonApp.AddPair('DATAHORA', '');
+    objJsonApp.AddPair('LATITUDE', self.Latitude);
+    objJsonApp.AddPair('LONGITUDE', self.Longitude);
+    objJsonApp.AddPair('OCORRENCIA_EM_ATENDIMENTO', gerarOcorrencias_Json);
+    objJsonApp.AddPair('STATUS', self.Servico_Status);
+    objJsonApp.AddPair('NUMERO1', self.Servico_Numero1);
+    objJsonApp.AddPair('NUMERO2', self.Servico_Numero2);
+    objJsonApp.AddPair('POLICIAL_STATUS', self.Policial_Status);
+    objJsonApp.AddPair('VIATURA_PREFIXO', self.Viatura_Prefixo);
+    objJsonApp.AddPair('VIATURA_PLACA', self.Viatura_Placa);
+    objJsonApp.AddPair('PATRULHEIROS', gerarServicos_Json);
+    result.AddPair('ONLINE', objJsonApp);
+  Except on E : Exception do
+     begin
+        result := TJSONObject.Create;
+        result.AddPair('STATUS', 'Erro, motivo - '+ E.Message);
+     End;
+  End;
+end;
+
+function TFirebase_ViaturaTempoReal.gerarOcorrencias_Json: TJSONArray;
+Var iOcorrencia  : TFirebase_Ocorrencias;
+    I : Integer;
+begin
+   result := TJSONArray.Create;
+
+   for I := 0 to self.FListOcorrencias.Count do
+   begin
+      Try
+         iOcorrencia := FListOcorrencias[I];
+         result.Add( iOcorrencia.ToJSonObject );
+      Except end;
+   end;
+end;
+
+function TFirebase_ViaturaTempoReal.gerarServicos_Json: TJSONArray;
+Var iPatrulheiro : TFirebase_Patrulheiros;
+    I : Integer;
+begin
+  result := TJSONArray.Create;
+
+  Try
+    for I := 0 to self.FListPatrulheiros.Count - 1 do
+    begin
+        iPatrulheiro := FListPatrulheiros[I];
+        result.Add( iPatrulheiro.ToJSonObject );
+    end;
+  Except end;
+end;
+
+procedure TFirebase_ViaturaTempoReal.resetarDados;
+Var itemPatrulha : TFirebase_Patrulheiros;
+    itemOcorrencia : TFirebase_Ocorrencias;
+begin
+  Viatura_Placa     := '';
+  Viatura_Prefixo   := '';
+  Servico_Codigo    := '';
+  Servico_Numero1   := '';
+  Servico_Numero2   := '';
+  Servico_Status    := '';
+  Corporacao_Codigo := '';
+  Policial_Codigo   := '';
+  Policial_Status   := '';
+
+  while (FListPatrulheiros.Count > 0) do
+  begin
+     Try
+       itemPatrulha := FListPatrulheiros.Items[0];
+       itemPatrulha.DisposeOf;
+     Except end;
+     FListPatrulheiros.Delete(0);
+  end;
+  FListPatrulheiros.Clear;
+
+  while (FListOcorrencias.Count > 0) do
+  begin
+     Try
+        itemOcorrencia := FListOcorrencias.Items[0];
+        itemOcorrencia.DisposeOf;
+     Except end;
+     FListOcorrencias.Delete(0);
+  end;
+  FListOcorrencias.Clear;
+end;
+
+function TFirebase_ViaturaTempoReal.sendData(tipo: TSendType; resource: String; viaThread: Boolean): TJSONObject;
+Var proc : TProc;
+    response : String;
+begin
+  result := TJSONObject.Create;
+  result.AddPair('STATUS', 'OK');
+  if (tipo = [stPost]) then
+     result.AddPair('METHOD', 'POST')
+  else if (tipo = [stPut]) then
+     result.AddPair('METHOD', 'PUT')
+  else if (tipo = [stPatch]) then
+     result.AddPair('METHOD', 'PATCH');
+  if (Trim(self.BaseURL) = '') then
+  begin
+     result := TJSONObject.Create;
+     result.AddPair('STATUS', 'ERRO');
+     result.AddPair('MENSAGEM', '"BASE URL" não informada.');
+     exit;
+  end;
+
+  proc := procedure
+           var FFC: IFirebaseDatabase;
+               param : TJSONObject;
+           begin
+              Try
+                 FFC := TFirebaseDatabase.Create;
+                 FFC.SetBaseURI(self.BaseURL + resource);
+
+                 if (tipo = [stPut]) then //ATUALIZA EM TEMPO REAL PARA O APP
+                 begin
+                    //efetuar a limpeza da tabela antes de inserir
+
+                    param := self.gerarJSON_APP;
+                    response := FFC.Put(['.json'], param, nil, false).ContentAsString(TEncoding.UTF8);
+                 end else if (tipo = [stPost]) then //MANTEM HISTÓRICO
+                 begin
+                    param := self.gerarJSON;
+                    response := FFC.Post(['.json'], param, nil, false).ContentAsString(TEncoding.UTF8);
+                 end;
+              Except end;
+           end;
+
+  if (viaThread) then
+     TTask.Run(procedure begin proc; end)
+  else begin
+     proc;
+     result.AddPair('RETORNO', response);
+  end;
+end;
+
+function TFirebase_ViaturaTempoReal.sendOffData(resource, json : String; viaThread : Boolean = false): TJSONObject;
+Var proc : TProc;
+    response : String;
+begin
+  result := TJSONObject.Create;
+  result.AddPair('STATUS', 'OK');
+  result.AddPair('METHOD', 'PUT');
+
+  if (Trim(self.BaseURL) = '') then
+  begin
+     result := TJSONObject.Create;
+     result.AddPair('STATUS', 'ERRO');
+     result.AddPair('MENSAGEM', '"BASE URL" não informada.');
+     exit;
+  end;
+
+  proc := procedure
+           var FFC: IFirebaseDatabase;
+               data : TJSONObject;
+           begin
+              Try
+                 data := (TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(json), 0) as TJSONObject);
+                 FFC := TFirebaseDatabase.Create;
+                 FFC.SetBaseURI(self.BaseURL + resource);
+                 response := FFC.Put(['.json'], data, nil, false).ContentAsString(TEncoding.UTF8);
+              Except end;
+           end;
+
+  if (viaThread) then
+     TTask.Run(procedure begin proc; end)
+  else begin
+     proc;
+     result.AddPair('RETORNO', response);
+  end;
+end;
+
+procedure TFirebase_ViaturaTempoReal.SetBaseURL(const Value: String);
+begin
+  FBaseURL := Value;
+end;
+
+procedure TFirebase_ViaturaTempoReal.SetCorporacao_Codigo(const Value: String);
+begin
+  FCorporacao_Codigo := Value;
+end;
+
+procedure TFirebase_ViaturaTempoReal.SetDataHora(const Value: TDateTime);
+begin
+  FDataHora := Value;
+end;
+
+procedure TFirebase_ViaturaTempoReal.SetLatitude(const Value: String);
+begin
+  FLatitude := Value;
+end;
+
+procedure TFirebase_ViaturaTempoReal.SetLongitude(const Value: String);
+begin
+  FLongitude := Value;
+end;
+
+procedure TFirebase_ViaturaTempoReal.SetPolicial_Codigo(const Value: String);
+begin
+  FPolicial_Codigo := Value;
+end;
+
+procedure TFirebase_ViaturaTempoReal.SetPolicial_Status(const Value: String);
+begin
+  FPolicial_Status := Value;
+end;
+
+procedure TFirebase_ViaturaTempoReal.SetServico_Codigo(const Value: String);
+begin
+  FServico_Codigo := Value;
+end;
+
+procedure TFirebase_ViaturaTempoReal.SetServico_Numero1(const Value: String);
+begin
+  FServico_Numero1 := Value;
+end;
+
+procedure TFirebase_ViaturaTempoReal.SetServico_Numero2(const Value: String);
+begin
+  FServico_Numero2 := Value;
+end;
+
+procedure TFirebase_ViaturaTempoReal.SetServico_Status(const Value: String);
+begin
+  FServico_Status := Value;
+end;
+
+procedure TFirebase_ViaturaTempoReal.SetViatura_Placa(const Value: String);
+begin
+  FViatura_Placa := Value;
+end;
+
+procedure TFirebase_ViaturaTempoReal.SetViatura_Prefixo(const Value: String);
+begin
+  FViatura_Prefixo := Value;
+end;
+
+{ TFirebase_Patrulheiros }
+
+procedure TFirebase_Patrulheiros.SetCodigo(const Value: String);
+begin
+  FCodigo := Value;
+end;
+
+procedure TFirebase_Patrulheiros.SetNome(const Value: String);
+begin
+  FNome := Value;
+end;
+
+function TFirebase_Patrulheiros.ToJSonObject : TJSONObject;
+begin
+  result := TJSonObject.Create;
+  result.AddPair('CODIGO', self.Codigo);
+  result.AddPair('NOME', self.Nome);
+end;
+
+{ TFirebase_Ocorrencias }
+
+procedure TFirebase_Ocorrencias.SetAlerta(const Value: String);
+begin
+  FAlerta := Value;
+end;
+
+procedure TFirebase_Ocorrencias.SetAlerta_Outro(const Value: String);
+begin
+  FAlerta_Outro := Value;
+end;
+
+procedure TFirebase_Ocorrencias.SetArma_Branca(const Value: String);
+begin
+  FArma_Branca := Value;
+end;
+
+procedure TFirebase_Ocorrencias.SetArma_Fogo(const Value: String);
+begin
+  FArma_Fogo := Value;
+end;
+
+procedure TFirebase_Ocorrencias.SetCodigo(const Value: String);
+begin
+  FCodigo := Value;
+end;
+
+procedure TFirebase_Ocorrencias.SetEmail(const Value: String);
+begin
+  FEmail := Value;
+end;
+
+procedure TFirebase_Ocorrencias.SetQtde_Envolvidos(const Value: String);
+begin
+  FQtde_Envolvidos := Value;
+end;
+
+function TFirebase_Ocorrencias.ToJSonObject : TJSONObject;
+begin
+  result := TJSonObject.Create;
+  result.AddPair('CODIGO', self.Codigo);
+  result.AddPair('CIDADAO_EMAIL', self.Email);
+  result.AddPair('ALERTA', self.Alerta);
+  result.AddPair('ALERTA_OUTRO', self.Alerta_Outro);
+  result.AddPair('ARMA_BRANCA', self.Arma_Branca);
+  result.AddPair('ARMA_FOGO', self.Arma_Fogo);
+  result.AddPair('QTDE_ENVOLVIDOS', self.Qtde_Envolvidos);
+end;
+
+end.

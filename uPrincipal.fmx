@@ -1,0 +1,312 @@
+object Form2: TForm2
+  Left = 0
+  Top = 0
+  Caption = 'Firebase'
+  ClientHeight = 688
+  ClientWidth = 299
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  OnVirtualKeyboardShown = FormVirtualKeyboardShown
+  OnVirtualKeyboardHidden = FormVirtualKeyboardHidden
+  DesignerMasterStyle = 3
+  object Rectangle1: TRectangle
+    Align = MostTop
+    Fill.Color = claGold
+    Size.Width = 299.000000000000000000
+    Size.Height = 50.000000000000000000
+    Size.PlatformDefault = False
+    Stroke.Kind = None
+    object Text2: TText
+      Align = Client
+      Size.Width = 251.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'FIREBASE REALTIME'
+      TextSettings.Font.Size = 22.000000000000000000
+      TextSettings.Font.StyleExt = {00070000000000000004000000}
+      object Text8: TText
+        Align = MostBottom
+        Size.Width = 251.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'DESENVOLVIDO POR DOUGLAS COLOMBO'
+        TextSettings.Font.Size = 10.000000000000000000
+        TextSettings.VertAlign = Trailing
+      end
+    end
+    object btnInfo: TButton
+      Align = MostRight
+      Position.X = 251.000000000000000000
+      Position.Y = 1.000000000000000000
+      Size.Width = 48.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = 'infotoolbutton'
+      TabOrder = 1
+      Text = 'btnInfo'
+      OnClick = btnInfoClick
+    end
+  end
+  object VertScrollBox1: TVertScrollBox
+    Align = Client
+    Size.Width = 299.000000000000000000
+    Size.Height = 503.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    Viewport.Width = 299.000000000000000000
+    Viewport.Height = 503.000000000000000000
+    object Layout2: TLayout
+      Align = MostTop
+      Position.Y = 121.000000000000000000
+      Size.Width = 299.000000000000000000
+      Size.Height = 184.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      object Text4: TText
+        Align = MostTop
+        Margins.Left = 2.000000000000000000
+        Margins.Top = 2.000000000000000000
+        Margins.Right = 2.000000000000000000
+        Margins.Bottom = 2.000000000000000000
+        Position.X = 2.000000000000000000
+        Position.Y = 2.000000000000000000
+        Size.Width = 295.000000000000000000
+        Size.Height = 56.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'NOME'
+        TextSettings.HorzAlign = Leading
+        TextSettings.VertAlign = Leading
+        object edtNome: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          Align = MostBottom
+          TabOrder = 0
+          TextSettings.Font.Size = 13.000000000000000000
+          Position.X = 4.000000000000000000
+          Position.Y = 24.000000000000000000
+          Margins.Left = 4.000000000000000000
+          Margins.Right = 4.000000000000000000
+          Size.Width = 287.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          TextPrompt = 'Escreva aqui seu nome...'
+          StyledSettings = [Family, Style, FontColor]
+        end
+      end
+      object Text5: TText
+        Align = MostTop
+        Margins.Left = 2.000000000000000000
+        Margins.Top = 2.000000000000000000
+        Margins.Right = 2.000000000000000000
+        Margins.Bottom = 2.000000000000000000
+        Position.X = 2.000000000000000000
+        Position.Y = 62.000000000000000000
+        Size.Width = 295.000000000000000000
+        Size.Height = 56.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'EMAIL'
+        TextSettings.HorzAlign = Leading
+        TextSettings.VertAlign = Leading
+        object edtEmail: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          Align = MostBottom
+          TabOrder = 0
+          TextSettings.Font.Size = 13.000000000000000000
+          Position.X = 4.000000000000000000
+          Position.Y = 24.000000000000000000
+          Margins.Left = 4.000000000000000000
+          Margins.Right = 4.000000000000000000
+          Size.Width = 287.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          TextPrompt = 'Escreva aqui seu email...'
+          StyledSettings = [Family, Style, FontColor]
+        end
+      end
+      object Text6: TText
+        Align = MostTop
+        Margins.Left = 2.000000000000000000
+        Margins.Top = 2.000000000000000000
+        Margins.Right = 2.000000000000000000
+        Margins.Bottom = 2.000000000000000000
+        Position.X = 2.000000000000000000
+        Position.Y = 122.000000000000000000
+        Size.Width = 295.000000000000000000
+        Size.Height = 56.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'APELIDO'
+        TextSettings.HorzAlign = Leading
+        TextSettings.VertAlign = Leading
+        object edtApelido: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          Align = MostBottom
+          TabOrder = 0
+          TextSettings.Font.Size = 13.000000000000000000
+          Position.X = 4.000000000000000000
+          Position.Y = 24.000000000000000000
+          Margins.Left = 4.000000000000000000
+          Margins.Right = 4.000000000000000000
+          Size.Width = 287.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          TextPrompt = 'Escreva aqui seu apelido...'
+          StyledSettings = [Family, Style, FontColor]
+        end
+      end
+    end
+    object Layout3: TLayout
+      Align = Top
+      Position.Y = 305.000000000000000000
+      Size.Width = 299.000000000000000000
+      Size.Height = 177.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      object btnPut: TButton
+        Align = Top
+        Position.Y = 44.000000000000000000
+        Size.Width = 299.000000000000000000
+        Size.Height = 44.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 3
+        Text = 'FIREBASE PUT'
+        TintColor = claSeagreen
+        OnClick = btnPutClick
+      end
+      object btnPost: TButton
+        Align = Top
+        Size.Width = 299.000000000000000000
+        Size.Height = 44.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 4
+        Text = 'FIREBASE POST'
+        TintColor = claRed
+        OnClick = btnPostClick
+      end
+      object btnGet: TButton
+        Align = Top
+        Position.Y = 88.000000000000000000
+        Size.Width = 299.000000000000000000
+        Size.Height = 44.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+        Text = 'FIREBASE GET'
+        TintColor = claDodgerblue
+        OnClick = btnGetClick
+      end
+    end
+    object Layout1: TLayout
+      Align = MostTop
+      Size.Width = 299.000000000000000000
+      Size.Height = 121.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      object Text1: TText
+        Align = MostTop
+        Margins.Left = 2.000000000000000000
+        Margins.Top = 2.000000000000000000
+        Margins.Right = 2.000000000000000000
+        Margins.Bottom = 2.000000000000000000
+        Position.X = 2.000000000000000000
+        Position.Y = 2.000000000000000000
+        Size.Width = 295.000000000000000000
+        Size.Height = 56.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'URL'
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        TextSettings.HorzAlign = Leading
+        TextSettings.VertAlign = Leading
+        object edtURL: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          Align = MostBottom
+          TabOrder = 0
+          Text = 'https://pushdouglas-c39de.firebaseio.com/'
+          TextSettings.Font.Size = 13.000000000000000000
+          Position.X = 4.000000000000000000
+          Position.Y = 24.000000000000000000
+          Margins.Left = 4.000000000000000000
+          Margins.Right = 4.000000000000000000
+          Size.Width = 287.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          TextPrompt = 'Informe aqui a URL'
+          StyledSettings = [Family, Style, FontColor]
+        end
+      end
+      object Text3: TText
+        Align = MostTop
+        Margins.Left = 2.000000000000000000
+        Margins.Top = 2.000000000000000000
+        Margins.Right = 2.000000000000000000
+        Margins.Bottom = 2.000000000000000000
+        Position.X = 2.000000000000000000
+        Position.Y = 62.000000000000000000
+        Size.Width = 295.000000000000000000
+        Size.Height = 56.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'NOME DO REPOSIT'#211'RIO'
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        TextSettings.HorzAlign = Leading
+        TextSettings.VertAlign = Leading
+        object edtRamo: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          Align = MostBottom
+          TabOrder = 0
+          TextSettings.Font.Size = 13.000000000000000000
+          Position.X = 4.000000000000000000
+          Position.Y = 24.000000000000000000
+          Margins.Left = 4.000000000000000000
+          Margins.Right = 4.000000000000000000
+          Size.Width = 287.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          TextPrompt = 'Informe o reposit'#243'rio para ser escrito no firebase'
+          StyledSettings = [Family, Style, FontColor]
+        end
+      end
+    end
+  end
+  object rcInferior: TRectangle
+    Align = Bottom
+    Position.Y = 553.000000000000000000
+    Size.Width = 299.000000000000000000
+    Size.Height = 135.000000000000000000
+    Size.PlatformDefault = False
+    Stroke.Thickness = 0.000000000000000000
+    object Text7: TText
+      Align = Top
+      Position.Y = 32.000000000000000000
+      Size.Width = 299.000000000000000000
+      Size.Height = 21.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'RETORNOS'
+      TextSettings.Font.StyleExt = {00070000000000000004000000}
+    end
+    object memRetorno: TMemo
+      Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+      DataDetectorTypes = []
+      ReadOnly = True
+      StyledSettings = [Family, Style, FontColor]
+      TextSettings.Font.Size = 10.000000000000000000
+      TextSettings.WordWrap = True
+      Align = Client
+      Size.Width = 299.000000000000000000
+      Size.Height = 82.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      Viewport.Width = 291.000000000000000000
+      Viewport.Height = 74.000000000000000000
+    end
+    object edtJSON: TEdit
+      Touch.InteractiveGestures = [LongTap, DoubleTap]
+      Align = MostTop
+      TabOrder = 2
+      ReadOnly = True
+      TextSettings.Font.Size = 8.000000000000000000
+      Size.Width = 299.000000000000000000
+      Size.Height = 32.000000000000000000
+      Size.PlatformDefault = False
+      StyledSettings = [Family, Style, FontColor]
+    end
+  end
+end
